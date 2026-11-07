@@ -22,7 +22,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}-v1
+          key: ${{ runner.os }}-buildozer-pygame210-v2
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
@@ -32,16 +32,18 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             git zip unzip \
             openjdk-17-jdk \
-            python3-pip \
+            python3-pip python3-dev \
             autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
             cmake libffi-dev libssl-dev \
-            build-essential ccache
+            build-essential ccache \
+            libsqlite3-dev libbz2-dev lzma liblzma-dev \
+            libgdbm-dev libgdbm-compat-dev
 
       - name: Install Buildozer and Cython
         run: |
           pip install --upgrade pip setuptools wheel
-          pip install buildozer
+          pip install buildozer==1.5.0
           pip install "cython==0.29.33"
 
       - name: Set JAVA_HOME
@@ -51,16 +53,21 @@ jobs:
         run: buildozer -v android debug 2>&1 | tee build.log
         timeout-minutes: 60
 
+      - name: Show bin directory contents
+        if: always()
+        run: ls -la bin/ 2>/dev/null || echo "bin/ directory was not created — build failed"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: NeonStrike-debug-apk
           path: bin/*.apk
           if-no-files-found: error
 
-      - name: Upload build log on failure
-        if: failure()
+      - name: Upload build log (always)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: build-log-failure
+          name: build-log
           path: build.log
