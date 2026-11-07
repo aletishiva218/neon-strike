@@ -15,10 +15,7 @@ orientation = landscape
 fullscreen = 1
 
 android.permissions = VIBRATE
-android.api = 33
-android.minapi = 24
-android.ndk = 25b
-android.ndk_api = 24
+android.api = 29
 android.accept_sdk_license = True
 
 p4a.bootstrap = sdl2
