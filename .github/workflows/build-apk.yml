@@ -13,22 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare cache directory
+        run: mkdir -p "$HOME/.buildozer"
+
       - name: Cache Android SDK and NDK
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-docker-${{ hashFiles('buildozer.spec') }}-v1
+          key: buildozer-docker-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-docker-
 
       - name: Build APK inside kivy/buildozer Docker image
         run: |
           docker run --rm \
-            --user root \
-            --volume "$HOME/.buildozer:/root/.buildozer" \
+            --volume "$HOME/.buildozer:/home/user/.buildozer" \
             --volume "$PWD:/home/user/hostcwd" \
             kivy/buildozer:latest \
-            bash -c "cd /home/user/hostcwd && buildozer android debug" \
-            2>&1 | tee build.log
+            android debug 2>&1 | tee build.log
         timeout-minutes: 60
 
       - name: Fix file permissions after Docker
